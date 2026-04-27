@@ -115,7 +115,7 @@ If you want to run this API on your own machine:
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/dharantej1/Current-Bill-API.git](https://github.com/dharantej1/Current-Bill-API.git)
+   git clone https://github.com/dharantej1/Current-Bill-API.git
    cd Current-Bill-API
    ```
 
