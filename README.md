@@ -1,8 +1,8 @@
 # TG Southern Power (Unofficial) API ⚡
 
-An unofficial, lightweight REST API built with **FastAPI** that fetches and parses electricity bill details from the TG Southern Power (Telangana) website. 
+An unofficial, lightweight REST API built with **FastAPI** that fetches, parses, and unifies electricity bill details from the TG Southern Power (Telangana) website. 
 
-This API acts as a proxy/scraper, taking in simple JSON requests, simulating browser sessions to bypass temporary cookie restrictions (`JSESSIONID`), and parsing complex HTML tables into clean, structured JSON data.
+Serving as the core extraction engine for utility management applications like **Power Track**, this API acts as a proxy/scraper. It takes in simple JSON requests, simulates a continuous browser session to bypass temporary cookie restrictions (`JSESSIONID`), and dynamically parses complex HTML tables across multiple utility endpoints into a single, clean JSON payload.
 
 🌍 **Live Base URL:** `https://current-bill-api.vercel.app`
 📖 **Interactive Docs (Swagger UI):** `https://current-bill-api.vercel.app/docs`
@@ -10,10 +10,10 @@ This API acts as a proxy/scraper, taking in simple JSON requests, simulating bro
 ---
 
 ## 🚀 Features
-* **Automated Session Handling:** Automatically fetches and manages `JSESSIONID` cookies so requests don't expire.
-* **HTML Parsing:** Converts raw HTML table data from the utility portal into clean, nested JSON.
-* **Dual Endpoints:** Supports both quick bill summaries and detailed chronological breakdowns (arrears, paid dates, etc.).
-* **Fast & Validated:** Built on FastAPI with Pydantic for automatic request validation.
+* **Automated Session Handling:** Automatically fetches and manages `JSESSIONID` cookies across multiple sequential requests so sessions don't expire.
+* **Unified Data Extraction:** Hits both the payment summary and detailed ledger pages in a single request, combining the data into one comprehensive response.
+* **Dynamic HTML Parsing:** Automatically detects table headers, normalizes text, strips hidden inputs, and converts raw HTML into machine-readable JSON keys (e.g., `bill_date_due_date` -> `bill_date` and `due_date`).
+* **Fast & Validated:** Built on FastAPI with Pydantic for automatic request validation and interactive documentation.
 
 ---
 
@@ -26,41 +26,10 @@ This API acts as a proxy/scraper, taking in simple JSON requests, simulating bro
 
 ---
 
-## 📡 API Endpoints
+## 📡 API Endpoint
 
-### 1. Basic Bill Summary
-Fetches the standard billing overview, including the current month's bill and due date.
-
-* **Endpoint:** `POST /api/fetch-bill`
-* **Content-Type:** `application/json`
-
-**Request Body:**
-```json
-{
-  "ukscno": "XXXXXXXXX"
-}
-```
-
-**Success Response (200 OK):**
-```json
-{
-  "status": "success",
-  "data": {
-    "consumer_name": "[REDACTED NAME]",
-    "ukscno": "XXXXXXXXX",
-    "service_number": "XXXX XXXXX",
-    "address": "[REDACTED ADDRESS]",
-    "units_consumed": "217",
-    "bill_date": "02-Apr-26",
-    "due_date": "16-Apr-26",
-    "current_month_bill": 1321.0,
-    "total_amount_due": 0.0
-  }
-}
-```
-
-### 2. Detailed Billing Info
-Fetches a granular breakdown of the bill, grouped by arrears, current charges, total payable, and last paid amounts.
+### Ultimate Billing Info
+Fetches a granular, unified breakdown of the bill by scraping both the payment summary page (for units consumed and totals) and the detailed billing info page (for arrears, ledgers, and past payments).
 
 * **Endpoint:** `POST /api/billing-info`
 * **Content-Type:** `application/json`
@@ -79,29 +48,46 @@ Fetches a granular breakdown of the bill, grouped by arrears, current charges, t
 {
   "status": "success",
   "data": {
-    "consumer_details": {
+    "payment_summary": {
       "consumer_name": "[REDACTED NAME]",
       "unique_service_number": "XXXXXXXXX",
       "service_number": "XXXX XXXXX",
-      "ero": "[REDACTED ERO]",
+      "ero": "14,*********",
       "address": "[REDACTED ADDRESS]",
-      "section_name": "[REDACTED SECTION]"
+      "section": "*********",
+      "units": "217",
+      "bill_date": "02-Apr-26",
+      "due_date": "16-Apr-26",
+      "current_month_bill": "1321",
+      "acd_amount": "0",
+      "arrears": "0",
+      "total_amount_to_be_paid": "0.0"
     },
-    "arrears": {
-      "date": "31-MAR-26",
-      "amount": "0"
-    },
-    "current_month_bill": {
-      "date": "02-APR-26",
-      "amount": "1321"
-    },
-    "total_payable": {
-      "due_date": "16-APR-26",
-      "amount": "1321"
-    },
-    "total_paid": {
-      "paid_date": "07-APR-26",
-      "paid_amount": "1321.0"
+    "detailed_ledger": {
+      "consumer_details": {
+        "consumer_name": "[REDACTED NAME]",
+        "unique_service_number": "XXXXXXXXX",
+        "service_number": "XXXX XXXXX",
+        "ero": "14,*********",
+        "address": "[REDACTED ADDRESS]",
+        "section_name": "*********"
+      },
+      "arrears": {
+        "date": "31-MAR-26",
+        "amount": "0"
+      },
+      "current_month_bill": {
+        "date": "02-APR-26",
+        "amount": "1321"
+      },
+      "total_payable": {
+        "due_date": "16-APR-26",
+        "amount": "1321"
+      },
+      "total_paid": {
+        "paid_date": "07-APR-26",
+        "paid_amount": "1321.0"
+      }
     }
   }
 }
